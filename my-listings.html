@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Listings</title>
+  <link rel="stylesheet" href="listings.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="#" class="logo">MyRealEstate</a>
+    <nav class="navbar">
+      <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="create-listing.html"><i class="fas fa-plus"></i> Create Listing</a>
+      <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </header>
+
+  <!-- Listings Section -->
+  <section class="listings">
+    <h2 class="heading">My Listings</h2>
+    <div class="box-container">
+
+      <!-- Listing Card Example -->
+      <div class="box">
+        <div class="thumb">
+          <img src="https://placehold.co/400x250" alt="Property Image">
+          <p><i class="fas fa-clock"></i> Active</p>
+        </div>
+        <div class="content">
+          <h3 class="name">2BHK Luxury Apartment</h3>
+          <p class="location"><i class="fas fa-map-marker-alt"></i> Nairobi, Kenya</p>
+          <p class="price"><i class="fas fa-tag"></i> KES 85,000/month</p>
+          <div class="flex-btn">
+            <a href="#" class="inline-option-btn"><i class="fas fa-pen"></i> Edit</a>
+            <a href="#" class="inline-option-btn"><i class="fas fa-check-circle"></i> Mark Sold</a>
+            <a href="#" class="inline-delete-btn"><i class="fas fa-trash"></i> Delete</a>
+          </div>
+        </div>
+      </div>
+      <button id="loadMoreBtn">Load More</button>
+
+      <!-- Add more .box blocks as needed -->
+
+    </div>
+  </section>
+ <script type="module">
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getFirestore, collection, query, where, orderBy, limit, startAfter, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "real‑estate‑b0c92.firebaseapp.com",
+  projectId: "real‑estate‑b0c92",
+  // ...
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const boxContainer = document.querySelector('.box-container');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const PAGE_SIZE = 5;
+let lastVisible = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return window.location.href = "login.html";
+  await loadListings(user.uid);
+});
+
+async function loadListings(uid, append = false) {
+  if (!append) boxContainer.innerHTML = '';
+  loadMoreBtn.disabled = true;
+  
+  let constraints = [
+    collection(db, "listings"),
+    where("userId", "==", uid),
+    orderBy("createdAt", "desc"),
+    limit(PAGE_SIZE)
+  ];
+  
+  if (append && lastVisible) {
+    constraints.push(startAfter(lastVisible));
+  }
+  
+  const q = query(...constraints);
+  const snapshot = await getDocs(q);
+  
+  if (snapshot.empty && !append) {
+    boxContainer.innerHTML = "<p>No listings yet.</p>";
+    loadMoreBtn.style.display = 'none';
+    return;
+  }
+  
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+    
+    const box = document.createElement("div");
+    box.className = "box";
+    box.innerHTML = `
+      <div class="thumb">
+        <img src="${data.images?.[0] || 'https://placehold.co/400x250'}" alt="">
+        <p><i class="fas fa-clock"></i> ${data.status === 'sold' ? 'Sold' : 'Active'}</p>
+      </div>
+      <div class="content">
+        <h3>${data.title}</h3>
+        <p><i class="fas fa-map-marker-alt"></i> ${data.location}</p>
+        <p><i class="fas fa-tag"></i> $${data.price}</p>
+        <div class="flex-btn">
+          <a href="edit-listing.html?id=${id}" class="inline-option-btn"><i class="fas fa-pen"></i> Edit</a>
+          <a href="#" class="inline-option-btn mark-sold" data-id="${id}"><i class="fas fa-check-circle"></i> Mark Sold</a>
+          <a href="#" class="inline-delete-btn delete-listing" data-id="${id}"><i class="fas fa-trash"></i> Delete</a>
+        </div>
+      </div>
+    `;
+    boxContainer.appendChild(box);
+  });
+  
+  lastVisible = snapshot.docs[snapshot.docs.length - 1];
+  loadMoreBtn.style.display = snapshot.size < PAGE_SIZE ? 'none' : 'block';
+  loadMoreBtn.disabled = false;
+}
+
+boxContainer.addEventListener('click', async e => {
+  const deleteBtn = e.target.closest('.delete-listing');
+  if (deleteBtn) {
+    e.preventDefault();
+    if (confirm("Confirm delete this listing?")) {
+      await deleteDoc(doc(db, "listings", deleteBtn.dataset.id));
+      loadListings(auth.currentUser.uid);
+    }
+    return;
+  }
+  
+  const soldBtn = e.target.closest('.mark-sold');
+  if (soldBtn) {
+    e.preventDefault();
+    await updateDoc(doc(db, "listings", soldBtn.dataset.id), { status: "sold" });
+    loadListings(auth.currentUser.uid);
+  }
+});
+
+loadMoreBtn.addEventListener('click', () => loadListings(auth.currentUser.uid, true));
+ </script>
+</body>
+</html>

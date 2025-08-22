@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Details - View Listing</title>
+ <link rel="stylesheet" href="view.css"><!-- Link to your custom CSS file -->
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="my-listings.html">My Listings</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="logout.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <section class="property-details">
+        <div class="container">
+            <div class="property-images">
+                <div class="image-gallery">
+                    <img src="images/property-1.jpg" alt="Property Image 1" class="main-image">
+                    <div class="thumbnail-gallery">
+                        <img src="images/property-2.jpg" alt="Property Image 2" class="thumbnail">
+                        <img src="images/property-3.jpg" alt="Property Image 3" class="thumbnail">
+                        <img src="images/property-4.jpg" alt="Property Image 4" class="thumbnail">
+                    </div>
+                </div>
+                <div class="property-video">
+                    <video controls>
+                        <source src="video/property-video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+
+            <div class="property-details-info">
+                <h1 class="property-title">Spacious 2-Bedroom Apartment for Rent</h1>
+                <p class="property-location"><i class="fas fa-map-marker-alt"></i> New York, NY</p>
+                <p class="property-price"><i class="fas fa-dollar-sign"></i> $2,500/month</p>
+
+                <div class="property-description">
+                    <h3>Description</h3>
+                    <p>This is a spacious 2-bedroom apartment located in the heart of New York City. It has a modern kitchen, large windows, and a balcony with a view. Perfect for a small family or professionals working in the city.</p>
+                </div>
+
+                <div class="contact-agent">
+                    <h3>Contact the Agent</h3>
+                    <form action="contact-agent.php" method="post">
+                        <input type="text" name="name" placeholder="Your Name" required>
+                        <input type="email" name="email" placeholder="Your Email" required>
+                        <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2025 RealEstate Company. All rights reserved.</p>
+    </footer>
+    
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- Font Awesome -->
+</body>
+</html>
